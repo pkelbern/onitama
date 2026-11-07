@@ -1,0 +1,25 @@
+{
+  "expansion": "senseis_path",
+  "name": "Sensei's Path",
+  "source": "Descrição textual de terceiros (chessvariants.org). NÃO conferido contra as cartas oficiais.",
+  "status": "pending_validation",
+  "notes": "Bloqueado para partidas até fechar P-02 (diagramas) e P-03 (selos). stamp=null indica selo desconhecido.",
+  "cards": [
+    {"id": "giraffe", "glyph": "長頸鹿",   "name_en": "Giraffe",   "name_pt": "Girafa",       "stamp": null, "moves": [[-2, 1], [2, 1], [0, -1]]},
+    {"id": "kirin", "glyph": "麒麟",     "name_en": "Kirin",     "name_pt": "Kirin",        "stamp": null, "moves": [[-1, 2], [1, 2], [0, -2]]},
+    {"id": "phoenix", "glyph": "鳳凰",   "name_en": "Phoenix",   "name_pt": "Fênix",        "stamp": null, "moves": [[-1, 1], [1, 1], [-2, 0], [2, 0]]},
+    {"id": "turtle", "glyph": "亀",    "name_en": "Turtle",    "name_pt": "Tartaruga",    "stamp": null, "moves": [[-2, 0], [2, 0], [-1, -1], [1, -1]]},
+    {"id": "dog", "glyph": "犬",       "name_en": "Dog",       "name_pt": "Cão",          "stamp": null, "moves": [[-1, 1], [-1, 0], [-1, -1]]},
+    {"id": "fox", "glyph": "狐",       "name_en": "Fox",       "name_pt": "Raposa",       "stamp": null, "moves": [[1, 1], [1, 0], [1, -1]]},
+    {"id": "bear", "glyph": "熊",      "name_en": "Bear",      "name_pt": "Urso",         "stamp": null, "moves": [[0, 1], [-1, 1], [1, -1]]},
+    {"id": "panda", "glyph": "熊猫",     "name_en": "Panda",     "name_pt": "Panda",        "stamp": null, "moves": [[0, 1], [1, 1], [-1, -1]]},
+    {"id": "viper", "glyph": "蝮",     "name_en": "Viper",     "name_pt": "Víbora",       "stamp": null, "moves": [[0, 1], [-2, 0], [1, -1]]},
+    {"id": "sea_snake", "glyph": "海蛇", "name_en": "Sea Snake", "name_pt": "Serpente-marinha", "stamp": null, "moves": [[0, 1], [2, 0], [-1, -1]]},
+    {"id": "rat", "glyph": "大鼠",       "name_en": "Rat",       "name_pt": "Ratazana",     "stamp": null, "moves": [[0, 1], [-1, 0], [1, -1]]},
+    {"id": "mouse", "glyph": "鼠",     "name_en": "Mouse",     "name_pt": "Camundongo",   "stamp": null, "moves": [[0, 1], [1, 0], [-1, -1]]},
+    {"id": "iguana", "glyph": "イグアナ",    "name_en": "Iguana",    "name_pt": "Iguana",       "stamp": null, "moves": [[0, 1], [-2, 1], [1, -1]]},
+    {"id": "tanuki", "glyph": "狸",    "name_en": "Tanuki",    "name_pt": "Tanuki",       "stamp": null, "moves": [[0, 1], [2, 1], [-1, -1]]},
+    {"id": "otter", "glyph": "獺",     "name_en": "Otter",     "name_pt": "Lontra",       "stamp": null, "moves": [[-1, 1], [1, -1], [2, 0]]},
+    {"id": "sable", "glyph": "貂",     "name_en": "Sable",     "name_pt": "Zibelina",     "stamp": null, "moves": [[1, 1], [-1, -1], [-2, 0]]}
+  ]
+}

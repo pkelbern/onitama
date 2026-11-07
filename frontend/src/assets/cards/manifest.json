@@ -1,0 +1,194 @@
+[
+  {
+    "id": "tiger",
+    "expansion": "base",
+    "image": "assets/cards/tiger.svg",
+    "pending": false
+  },
+  {
+    "id": "crab",
+    "expansion": "base",
+    "image": "assets/cards/crab.svg",
+    "pending": false
+  },
+  {
+    "id": "monkey",
+    "expansion": "base",
+    "image": "assets/cards/monkey.svg",
+    "pending": false
+  },
+  {
+    "id": "crane",
+    "expansion": "base",
+    "image": "assets/cards/crane.svg",
+    "pending": false
+  },
+  {
+    "id": "dragon",
+    "expansion": "base",
+    "image": "assets/cards/dragon.svg",
+    "pending": false
+  },
+  {
+    "id": "elephant",
+    "expansion": "base",
+    "image": "assets/cards/elephant.svg",
+    "pending": false
+  },
+  {
+    "id": "mantis",
+    "expansion": "base",
+    "image": "assets/cards/mantis.svg",
+    "pending": false
+  },
+  {
+    "id": "boar",
+    "expansion": "base",
+    "image": "assets/cards/boar.svg",
+    "pending": false
+  },
+  {
+    "id": "frog",
+    "expansion": "base",
+    "image": "assets/cards/frog.svg",
+    "pending": false
+  },
+  {
+    "id": "goose",
+    "expansion": "base",
+    "image": "assets/cards/goose.svg",
+    "pending": false
+  },
+  {
+    "id": "horse",
+    "expansion": "base",
+    "image": "assets/cards/horse.svg",
+    "pending": false
+  },
+  {
+    "id": "eel",
+    "expansion": "base",
+    "image": "assets/cards/eel.svg",
+    "pending": false
+  },
+  {
+    "id": "rabbit",
+    "expansion": "base",
+    "image": "assets/cards/rabbit.svg",
+    "pending": false
+  },
+  {
+    "id": "rooster",
+    "expansion": "base",
+    "image": "assets/cards/rooster.svg",
+    "pending": false
+  },
+  {
+    "id": "ox",
+    "expansion": "base",
+    "image": "assets/cards/ox.svg",
+    "pending": false
+  },
+  {
+    "id": "cobra",
+    "expansion": "base",
+    "image": "assets/cards/cobra.svg",
+    "pending": false
+  },
+  {
+    "id": "giraffe",
+    "expansion": "senseis_path",
+    "image": "assets/cards/giraffe.svg",
+    "pending": true
+  },
+  {
+    "id": "kirin",
+    "expansion": "senseis_path",
+    "image": "assets/cards/kirin.svg",
+    "pending": true
+  },
+  {
+    "id": "phoenix",
+    "expansion": "senseis_path",
+    "image": "assets/cards/phoenix.svg",
+    "pending": true
+  },
+  {
+    "id": "turtle",
+    "expansion": "senseis_path",
+    "image": "assets/cards/turtle.svg",
+    "pending": true
+  },
+  {
+    "id": "dog",
+    "expansion": "senseis_path",
+    "image": "assets/cards/dog.svg",
+    "pending": true
+  },
+  {
+    "id": "fox",
+    "expansion": "senseis_path",
+    "image": "assets/cards/fox.svg",
+    "pending": true
+  },
+  {
+    "id": "bear",
+    "expansion": "senseis_path",
+    "image": "assets/cards/bear.svg",
+    "pending": true
+  },
+  {
+    "id": "panda",
+    "expansion": "senseis_path",
+    "image": "assets/cards/panda.svg",
+    "pending": true
+  },
+  {
+    "id": "viper",
+    "expansion": "senseis_path",
+    "image": "assets/cards/viper.svg",
+    "pending": true
+  },
+  {
+    "id": "sea_snake",
+    "expansion": "senseis_path",
+    "image": "assets/cards/sea_snake.svg",
+    "pending": true
+  },
+  {
+    "id": "rat",
+    "expansion": "senseis_path",
+    "image": "assets/cards/rat.svg",
+    "pending": true
+  },
+  {
+    "id": "mouse",
+    "expansion": "senseis_path",
+    "image": "assets/cards/mouse.svg",
+    "pending": true
+  },
+  {
+    "id": "iguana",
+    "expansion": "senseis_path",
+    "image": "assets/cards/iguana.svg",
+    "pending": true
+  },
+  {
+    "id": "tanuki",
+    "expansion": "senseis_path",
+    "image": "assets/cards/tanuki.svg",
+    "pending": true
+  },
+  {
+    "id": "otter",
+    "expansion": "senseis_path",
+    "image": "assets/cards/otter.svg",
+    "pending": true
+  },
+  {
+    "id": "sable",
+    "expansion": "senseis_path",
+    "image": "assets/cards/sable.svg",
+    "pending": true
+  }
+]

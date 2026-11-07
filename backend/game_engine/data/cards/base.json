@@ -1,0 +1,25 @@
+{
+  "expansion": "base",
+  "name": "Onitama",
+  "source": "Manual oficial Onitama (Arcane Wonders) — ver docs/01-matriz-regras.md",
+  "status": "official",
+  "notes": "Coordenadas: x = direita do dono da carta, y = para frente. Selos: pendência P-01 (conferir nas cartas físicas).",
+  "cards": [
+    {"id": "tiger", "glyph": "虎",    "name_en": "Tiger",    "name_pt": "Tigre",        "stamp": "blue", "moves": [[0, 2], [0, -1]]},
+    {"id": "crab", "glyph": "蟹",     "name_en": "Crab",     "name_pt": "Caranguejo",   "stamp": "blue", "moves": [[-2, 0], [2, 0], [0, 1]]},
+    {"id": "monkey", "glyph": "猿",   "name_en": "Monkey",   "name_pt": "Macaco",       "stamp": "blue", "moves": [[-1, 1], [1, 1], [-1, -1], [1, -1]]},
+    {"id": "crane", "glyph": "鶴",    "name_en": "Crane",    "name_pt": "Grou",         "stamp": "blue", "moves": [[0, 1], [-1, -1], [1, -1]]},
+    {"id": "dragon", "glyph": "龍",   "name_en": "Dragon",   "name_pt": "Dragão",       "stamp": "red",  "moves": [[-2, 1], [2, 1], [-1, -1], [1, -1]]},
+    {"id": "elephant", "glyph": "象", "name_en": "Elephant", "name_pt": "Elefante",     "stamp": "red",  "moves": [[-1, 1], [1, 1], [-1, 0], [1, 0]]},
+    {"id": "mantis", "glyph": "蟷螂",   "name_en": "Mantis",   "name_pt": "Louva-a-deus", "stamp": "red",  "moves": [[-1, 1], [1, 1], [0, -1]]},
+    {"id": "boar", "glyph": "猪",     "name_en": "Boar",     "name_pt": "Javali",       "stamp": "red",  "moves": [[-1, 0], [1, 0], [0, 1]]},
+    {"id": "frog", "glyph": "蛙",     "name_en": "Frog",     "name_pt": "Sapo",         "stamp": "red",  "moves": [[-2, 0], [-1, 1], [1, -1]]},
+    {"id": "goose", "glyph": "鵞鳥",    "name_en": "Goose",    "name_pt": "Ganso",        "stamp": "blue", "moves": [[-1, 0], [-1, 1], [1, 0], [1, -1]]},
+    {"id": "horse", "glyph": "馬",    "name_en": "Horse",    "name_pt": "Cavalo",       "stamp": "red",  "moves": [[-1, 0], [0, 1], [0, -1]]},
+    {"id": "eel", "glyph": "鰻",      "name_en": "Eel",      "name_pt": "Enguia",       "stamp": "blue", "moves": [[-1, 1], [-1, -1], [1, 0]]},
+    {"id": "rabbit", "glyph": "兎",   "name_en": "Rabbit",   "name_pt": "Coelho",       "stamp": "blue", "moves": [[2, 0], [1, 1], [-1, -1]]},
+    {"id": "rooster", "glyph": "鶏",  "name_en": "Rooster",  "name_pt": "Galo",         "stamp": "red",  "moves": [[1, 0], [1, 1], [-1, 0], [-1, -1]]},
+    {"id": "ox", "glyph": "牛",       "name_en": "Ox",       "name_pt": "Boi",          "stamp": "blue", "moves": [[1, 0], [0, 1], [0, -1]]},
+    {"id": "cobra", "glyph": "蛇",    "name_en": "Cobra",    "name_pt": "Cobra",        "stamp": "red",  "moves": [[-1, 0], [1, 1], [1, -1]]}
+  ]
+}

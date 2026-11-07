@@ -1,0 +1,18 @@
+[project]
+name = "onitama-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "Plataforma Onitama — motor de regras (Etapa 1)"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["game_engine*"]
+
+[tool.setuptools.package-data]
+game_engine = ["data/cards/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
