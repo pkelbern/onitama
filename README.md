@@ -14,6 +14,17 @@ backend/
   tests/                363 testes (pytest)
 ```
 
+## Protótipo jogável
+
+`prototype/index.html` é a mesa de jogo no navegador: jogo-base contra a IA (4 níveis) ou 2 jogadores no mesmo aparelho.
+Abra com um servidor local (as cartas são carregadas de `prototype/cards/`):
+
+```bash
+cd prototype && python -m http.server 8000   # http://localhost:8000
+```
+
+É provisório: as regras rodam em JavaScript no próprio navegador. Na versão final o servidor Django é quem valida as jogadas.
+
 ## Executar
 
 ```bash

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesa de Onitama</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Yuji+Syuku&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Mesa de madeira escura, tapete de papel washi, peças em laca vermelha e índigo.
+     Layout: mesa no centro (mão adversária / tabuleiro + cartas laterais / sua mão), painel à direita. */
+  --wood: #3b2b20;
+  --wood-deep: #1e140d;
+  --paper: #f3ead8;
+  --paper-2: #e9dec6;
+  --ink: #1f1b17;
+  --red: #b3352c;
+  --blue: #2d4f7d;
+  --gold: #d2ad62;
+  --muted: #b9aa92;
+  --font-display: "Yuji Syuku", "Shippori Mincho", "Hiragino Mincho ProN", serif;
+  --font-body: "Shippori Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  --cw: clamp(120px, 15vw, 210px);
+  --ch: calc(var(--cw) * 0.5625);
+  --bs: clamp(280px, min(40vw, 60vh), 520px);
+  --gap: clamp(10px, 1.6vw, 22px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--wood-deep);
+  color: var(--paper);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.app {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+/* ---------- Mesa ---------- */
+.table {
+  position: relative;
+  display: grid;
+  place-content: center;
+  grid-template-areas:
+    ".     top    ."
+    "sideL board  sideR"
+    ".     bottom .";
+  grid-template-columns: var(--cw) var(--bs) var(--cw);
+  gap: var(--gap);
+  padding: clamp(16px, 3vw, 40px);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255, 220, 170, .10), transparent 65%),
+    repeating-linear-gradient(92deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.025) 9px 10px, transparent 10px 23px),
+    linear-gradient(180deg, #47331f, var(--wood) 40%, #2c1f15);
+  overflow: hidden;
+}
+.hand { display: flex; gap: var(--gap); justify-content: center; }
+.hand.top { grid-area: top; }
+.hand.bottom { grid-area: bottom; }
+.side { align-self: center; }
+.side.left { grid-area: sideL; }
+.side.right { grid-area: sideR; }
+.slot {
+  width: var(--cw);
+  height: var(--ch);
+  border: 1.5px dashed rgba(243, 234, 216, .22);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: rgba(243, 234, 216, .35);
+  text-transform: uppercase;
+}
+.hand-label {
+  position: absolute;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(243, 234, 216, .55);
+  display: flex; align-items: center; gap: 8px;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot.red { background: var(--red); box-shadow: 0 0 0 2px rgba(255,255,255,.15); }
+.dot.blue { background: var(--blue); box-shadow: 0 0 0 2px rgba(255,255,255,.15); }
+
+/* ---------- Tabuleiro ---------- */
+.board-wrap {
+  grid-area: board;
+  width: var(--bs);
+  aspect-ratio: 1;
+  justify-self: center;
+  padding: calc(var(--bs) * .05);
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 2px 0 rgba(255,255,255,.4) inset;
+  position: relative;
+}
+.board-wrap::before {
+  content: "";
+  position: absolute; inset: 0; border-radius: 10px; pointer-events: none;
+  background: repeating-linear-gradient(8deg, rgba(120,90,50,.05) 0 1px, transparent 1px 6px);
+}
+.grid {
+  position: relative;
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  border: 2px solid var(--ink);
+  touch-action: none;
+}
+.cell {
+  position: relative;
+  border: 0;
+  border-right: 1px solid rgba(31,27,23,.35);
+  border-bottom: 1px solid rgba(31,27,23,.35);
+  background: var(--paper);
+  padding: 0;
+  cursor: pointer;
+}
+.cell.alt { background: var(--paper-2); }
+.cell.col4 { border-right: 0; }
+.cell.row4 { border-bottom: 0; }
+.cell .torii {
+  position: absolute; inset: 14%;
+  opacity: .28;
+}
+.cell.arch-red .torii { color: var(--red); }
+.cell.arch-blue .torii { color: var(--blue); }
+.cell.last { background: rgba(210, 173, 98, .28); }
+.cell.sel { box-shadow: inset 0 0 0 3px var(--gold); }
+.cell.dest::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 26%; height: 26%; transform: translate(-50%, -50%);
+  border-radius: 50%; background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(210,173,98,.3);
+}
+.cell.dest.capture::after {
+  width: 86%; height: 86%; background: transparent;
+  border: 4px solid var(--gold); box-shadow: 0 0 12px rgba(210,173,98,.8);
+}
+.coord {
+  position: absolute; font-size: calc(var(--bs) * .028); color: rgba(31,27,23,.55);
+  pointer-events: none;
+}
+.pieces { position: absolute; inset: 0; pointer-events: none; }
+.piece {
+  position: absolute; width: 20%; height: 20%;
+  display: grid; place-items: center;
+  transition: left .42s cubic-bezier(.3,.7,.2,1), top .42s cubic-bezier(.3,.7,.2,1), opacity .35s, transform .35s;
+  z-index: 2;
+}
+.piece.dragging { transition: none; z-index: 5; }
+.piece.gone { opacity: 0; transform: scale(.4) rotate(-20deg); }
+.token {
+  width: 70%; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-size: calc(var(--bs) * .062);
+  color: var(--paper);
+  line-height: 1;
+  box-shadow: 0 5px 8px rgba(0,0,0,.4), inset 0 -4px 6px rgba(0,0,0,.35), inset 0 3px 4px rgba(255,255,255,.25);
+}
+.piece.red .token { background: radial-gradient(circle at 35% 28%, #d9574b, var(--red) 55%, #6e1b15); }
+.piece.blue .token { background: radial-gradient(circle at 35% 28%, #4f78ad, var(--blue) 55%, #142843); }
+.piece.master .token {
+  width: 84%;
+  font-size: calc(var(--bs) * .08);
+  border: 3px solid var(--gold);
+}
+.piece.threat .token { animation: threat 1.1s ease-in-out infinite; }
+@keyframes threat {
+  0%, 100% { box-shadow: 0 5px 8px rgba(0,0,0,.4), 0 0 0 0 rgba(255,80,60,.0); }
+  50% { box-shadow: 0 5px 8px rgba(0,0,0,.4), 0 0 0 7px rgba(255,80,60,.55); }
+}
+
+/* ---------- Cartas ---------- */
+.cards { position: absolute; inset: 0; pointer-events: none; }
+.card {
+  position: absolute;
+  pointer-events: auto;
+  border: 0; padding: 0; background: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: left .6s cubic-bezier(.3,.7,.2,1), top .6s cubic-bezier(.3,.7,.2,1), transform .6s cubic-bezier(.3,.7,.2,1), box-shadow .2s, filter .2s;
+  box-shadow: 0 10px 22px rgba(0,0,0,.5);
+  z-index: 3;
+}
+.card img { width: 100%; height: 100%; display: block; border-radius: 12px; pointer-events: none; user-select: none; }
+.card.selected { box-shadow: 0 0 0 3px var(--gold), 0 16px 30px rgba(0,0,0,.6); z-index: 4; }
+.card.ask { box-shadow: 0 0 0 3px var(--gold), 0 0 24px rgba(210,173,98,.8); }
+.card.idle { filter: saturate(.75) brightness(.86); cursor: default; }
+.card.side-card { filter: saturate(.8) brightness(.9); cursor: default; }
+
+.toast {
+  position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+  background: rgba(20, 14, 9, .92); border: 1px solid rgba(210,173,98,.5);
+  padding: 10px 16px; border-radius: 8px; font-size: 14px; max-width: min(90%, 460px);
+  text-align: center; z-index: 10; transition: opacity .25s;
+}
+.toast[hidden] { display: block; opacity: 0; pointer-events: none; }
+
+/* ---------- Painel ---------- */
+.panel {
+  background: #17100b;
+  border-left: 1px solid rgba(210,173,98,.18);
+  padding: 22px 20px;
+  display: flex; flex-direction: column; gap: 18px;
+  min-height: 0;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 { font-family: var(--font-display); font-weight: 400; font-size: 34px; margin: 0; letter-spacing: .04em; }
+.brand span { color: var(--muted); font-size: 13px; }
+.turn {
+  border: 1px solid rgba(210,173,98,.3);
+  border-radius: 10px; padding: 14px;
+  background: rgba(255,255,255,.03);
+}
+.turn strong { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 600; }
+.turn p { margin: 6px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.turn .warn { color: #ff9c8a; }
+.counts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px; }
+.counts div { background: rgba(255,255,255,.04); border-radius: 8px; padding: 8px 10px; display: flex; gap: 8px; align-items: center; }
+.buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(243,234,216,.2);
+  border-radius: 8px; padding: 9px 10px; cursor: pointer; font-size: 14px;
+}
+.btn:hover { background: rgba(255,255,255,.11); }
+.btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.primary:hover { background: #c8443a; }
+.btn:disabled { opacity: .4; cursor: default; }
+.history { flex: 1; min-height: 120px; display: flex; flex-direction: column; }
+.history h2, .panel h2 { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 400; margin: 0 0 8px; }
+.history ol { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; max-height: 40vh; font-size: 14px; font-variant-numeric: tabular-nums; }
+.history li { display: grid; grid-template-columns: 28px 12px 1fr auto; gap: 8px; align-items: center; padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.history li .n { color: var(--muted); }
+.history li .cap { color: #ff9c8a; font-size: 12px; }
+.history .empty { color: var(--muted); font-size: 14px; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+
+/* ---------- Diálogos ---------- */
+.overlay {
+  position: fixed; inset: 0; background: rgba(10, 6, 3, .72);
+  display: grid; place-items: center; z-index: 50; padding: 16px;
+}
+.overlay[hidden] { display: none; }
+.dialog {
+  background: var(--paper); color: var(--ink);
+  border-radius: 14px; padding: 26px; width: min(460px, 100%);
+  box-shadow: 0 30px 60px rgba(0,0,0,.6);
+  max-height: 90vh; overflow-y: auto;
+}
+.dialog h2 { font-family: var(--font-display); font-weight: 400; font-size: 30px; margin: 0 0 16px; text-wrap: balance; }
+.dialog fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+.dialog legend { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #6c6050; margin-bottom: 8px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg label {
+  border: 1.5px solid rgba(31,27,23,.25); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 15px;
+}
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 2px; }
+.dialog .btn { border-color: rgba(31,27,23,.3); color: var(--ink); background: transparent; }
+.dialog .btn.primary { color: #fff; background: var(--red); border-color: var(--red); }
+.dialog .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+.dialog .note { font-size: 13px; color: #6c6050; line-height: 1.5; margin: 0 0 16px; }
+.win { text-align: center; }
+.win .kanji { font-family: var(--font-display); font-size: 110px; line-height: 1; margin: 0 0 6px; }
+.win .kanji.red { color: var(--red); }
+.win .kanji.blue { color: var(--blue); }
+.win p { margin: 0 0 18px; line-height: 1.5; }
+.win .actions { justify-content: center; }
+.library { width: min(980px, 100%); }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.lib-grid figure { margin: 0; }
+.lib-grid img { width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,.2); display: block; }
+.lib-grid figcaption { font-size: 13px; margin-top: 6px; line-height: 1.45; color: #4a4036; }
+.lib-grid figcaption b { color: var(--ink); }
+
+body.no-anim * { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+@media (max-width: 1000px) {
+  .app { grid-template-columns: 1fr; }
+  .panel { border-left: 0; border-top: 1px solid rgba(210,173,98,.18); }
+  .history ol { max-height: 260px; }
+  :root { --cw: clamp(120px, 22vw, 200px); --bs: clamp(280px, min(52vw, 62vh), 500px); }
+}
+@media (max-width: 680px) {
+  :root { --cw: min(43vw, 190px); --bs: min(92vw, 460px); --gap: 10px; }
+  .table {
+    grid-template-areas: "top top" "board board" "sideL sideR" "bottom bottom";
+    grid-template-columns: var(--cw) var(--cw);
+    padding: 34px 12px 34px;
+  }
+  .board-wrap { justify-self: center; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="table" id="table" aria-label="Mesa de jogo">
+    <div class="hand top"><div class="slot" id="slot-top-0"></div><div class="slot" id="slot-top-1"></div></div>
+    <div class="side left"><div class="slot" id="slot-side-left">troca</div></div>
+    <div class="board-wrap" id="boardWrap">
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="side right"><div class="slot" id="slot-side-right">troca</div></div>
+    <div class="hand bottom"><div class="slot" id="slot-bottom-0"></div><div class="slot" id="slot-bottom-1"></div></div>
+    <div class="cards" id="cards"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <aside class="panel">
+    <div class="brand"><h1>Onitama</h1></div>
+    <span style="color:var(--muted);font-size:13px;margin-top:-12px" id="modeLabel"></span>
+    <section class="turn" aria-live="polite">
+      <strong id="turnTitle"></strong>
+      <p id="turnHint"></p>
+    </section>
+    <div class="counts" id="counts"></div>
+    <div class="buttons">
+      <button class="btn primary" id="btnNew" type="button">Nova partida</button>
+      <button class="btn" id="btnUndo" type="button">Desfazer</button>
+      <button class="btn" id="btnLibrary" type="button">Ver as 16 cartas</button>
+      <button class="btn" id="btnRules" type="button">Regras</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="animToggle" checked> Animações</label>
+    <section class="history">
+      <h2>Histórico</h2>
+      <ol id="history"></ol>
+    </section>
+  </aside>
+</div>
+
+<div class="overlay" id="newDialog" hidden>
+  <form class="dialog" id="newForm">
+    <h2>Nova partida</h2>
+    <fieldset>
+      <legend>Adversário</legend>
+      <div class="seg">
+        <label><input type="radio" name="mode" value="ai" id="mode-ai" checked> Contra a IA</label>
+        <label><input type="radio" name="mode" value="local" id="mode-local"> 2 jogadores neste aparelho</label>
+      </div>
+    </fieldset>
+    <fieldset id="levelSet">
+      <legend>Nível da IA</legend>
+      <div class="seg">
+        <label><input type="radio" name="level" value="easy" id="lv-easy"> Fácil</label>
+        <label><input type="radio" name="level" value="medium" id="lv-medium" checked> Médio</label>
+        <label><input type="radio" name="level" value="hard" id="lv-hard"> Difícil</label>
+        <label><input type="radio" name="level" value="expert" id="lv-expert"> Especialista</label>
+      </div>
+    </fieldset>
+    <fieldset id="colorSet">
+      <legend>Sua cor</legend>
+      <div class="seg">
+        <label><input type="radio" name="color" value="red" id="c-red" checked> Vermelho</label>
+        <label><input type="radio" name="color" value="blue" id="c-blue"> Azul</label>
+      </div>
+    </fieldset>
+    <fieldset id="rotateSet" hidden>
+      <legend>Mesa</legend>
+      <div class="seg">
+        <label><input type="radio" name="rotate" value="no" id="rot-no" checked> Fixa</label>
+        <label><input type="radio" name="rotate" value="yes" id="rot-yes"> Girar a cada turno</label>
+      </div>
+    </fieldset>
+    <p class="note">As 5 cartas são sorteadas entre as 16 do jogo-base. Quem começa é definido pela cor do selo da carta de troca, como no jogo físico.</p>
+    <div class="actions">
+      <button class="btn" type="button" id="newCancel">Cancelar</button>
+      <button class="btn primary" type="submit">Começar</button>
+    </div>
+  </form>
+</div>
+
+<div class="overlay" id="winDialog" hidden>
+  <div class="dialog win">
+    <div class="kanji" id="winKanji">勝</div>
+    <h2 id="winTitle"></h2>
+    <p id="winText"></p>
+    <div class="actions">
+      <button class="btn" type="button" id="winClose">Ver o tabuleiro</button>
+      <button class="btn primary" type="button" id="winNew">Nova partida</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="libDialog" hidden>
+  <div class="dialog library">
+    <h2>As 16 cartas do jogo-base</h2>
+    <p class="note">O quadrado preto é a peça; os coloridos, onde ela pode ir. O selo indica quem começa quando a carta sai como carta de troca. Para o jogador de cima, a carta é girada 180°.</p>
+    <div class="lib-grid" id="libGrid"></div>
+    <div class="actions"><button class="btn primary" type="button" id="libClose">Fechar</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="rulesDialog" hidden>
+  <div class="dialog">
+    <h2>Como jogar</h2>
+    <p class="note" style="color:var(--ink);font-size:15px">
+      <b>No seu turno:</b> escolha uma das suas duas cartas e mova uma peça sua (Mestre ou Aluno) para uma das casas mostradas. Pode tocar na carta e depois na peça, ou na peça e depois no destino. Também dá para arrastar a peça.<br><br>
+      <b>Saltos e capturas:</b> as peças pulam por cima de outras. Parar numa peça adversária a captura. Não pode parar sobre peça sua nem sair do tabuleiro.<br><br>
+      <b>Troca:</b> a carta usada vai para o lado da mesa, virada para o adversário, e você pega a carta de troca. No turno seguinte, o adversário a recebe.<br><br>
+      <b>Sem movimento:</b> se houver jogada possível, você é obrigado a jogar. Só quando nenhuma carta permite mover, você troca uma carta sem mover.<br><br>
+      <b>Vitória:</b> capture o Mestre adversário (Caminho da Pedra) ou leve o seu Mestre ao Arco do Templo adversário, a casa marcada com o portal (Caminho do Fluxo).
+    </p>
+    <div class="actions"><button class="btn primary" type="button" id="rulesClose">Entendi</button></div>
+  </div>
+</div>
+
+<script>
+/* ===================== Motor de regras (mesmas regras do backend Python) ===================== */
+function ENGINE() {
+  const CARDS = {
+    tiger:    { en: "Tiger",    pt: "Tigre",        stamp: "blue", moves: [[0,2],[0,-1]] },
+    crab:     { en: "Crab",     pt: "Caranguejo",   stamp: "blue", moves: [[-2,0],[2,0],[0,1]] },
+    monkey:   { en: "Monkey",   pt: "Macaco",       stamp: "blue", moves: [[-1,1],[1,1],[-1,-1],[1,-1]] },
+    crane:    { en: "Crane",    pt: "Grou",         stamp: "blue", moves: [[0,1],[-1,-1],[1,-1]] },
+    dragon:   { en: "Dragon",   pt: "Dragão",       stamp: "red",  moves: [[-2,1],[2,1],[-1,-1],[1,-1]] },
+    elephant: { en: "Elephant", pt: "Elefante",     stamp: "red",  moves: [[-1,1],[1,1],[-1,0],[1,0]] },
+    mantis:   { en: "Mantis",   pt: "Louva-a-deus", stamp: "red",  moves: [[-1,1],[1,1],[0,-1]] },
+    boar:     { en: "Boar",     pt: "Javali",       stamp: "red",  moves: [[-1,0],[1,0],[0,1]] },
+    frog:     { en: "Frog",     pt: "Sapo",         stamp: "red",  moves: [[-2,0],[-1,1],[1,-1]] },
+    goose:    { en: "Goose",    pt: "Ganso",        stamp: "blue", moves: [[-1,0],[-1,1],[1,0],[1,-1]] },
+    horse:    { en: "Horse",    pt: "Cavalo",       stamp: "red",  moves: [[-1,0],[0,1],[0,-1]] },
+    eel:      { en: "Eel",      pt: "Enguia",       stamp: "blue", moves: [[-1,1],[-1,-1],[1,0]] },
+    rabbit:   { en: "Rabbit",   pt: "Coelho",       stamp: "blue", moves: [[2,0],[1,1],[-1,-1]] },
+    rooster:  { en: "Rooster",  pt: "Galo",         stamp: "red",  moves: [[1,0],[1,1],[-1,0],[-1,-1]] },
+    ox:       { en: "Ox",       pt: "Boi",          stamp: "blue", moves: [[1,0],[0,1],[0,-1]] },
+    cobra:    { en: "Cobra",    pt: "Cobra",        stamp: "red",  moves: [[-1,0],[1,1],[1,-1]] },
+  };
+  const RED = "red", BLUE = "blue";
+  const opp = p => (p === RED ? BLUE : RED);
+  const ARCH = { red: 2, blue: 22 };              // índice y*5+x
+  const WIN = 1000000;
+
+  function newGame() {
+    const ids = Object.keys(CARDS);
+    for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    const cells = new Array(25).fill(null);
+    for (let x = 0; x < 5; x++) {
+      cells[x] = { o: RED, k: x === 2 ? "M" : "S", id: "r" + x };
+      cells[20 + x] = { o: BLUE, k: x === 2 ? "M" : "S", id: "b" + x };
+    }
+    const first = CARDS[ids[4]].stamp;
+    return { cells, hands: { red: [ids[0], ids[1]], blue: [ids[2], ids[3]] }, side: ids[4], cur: first, first, turn: 0, winner: null, reason: null };
+  }
+
+  function boardMoves(s, p) {
+    const o = p === RED ? 1 : -1, out = [];
+    for (const card of s.hands[p]) {
+      const mv = CARDS[card].moves;
+      for (let i = 0; i < 25; i++) {
+        const pc = s.cells[i];
+        if (!pc || pc.o !== p) continue;
+        const x = i % 5, y = (i / 5) | 0;
+        for (const [dx, dy] of mv) {
+          const nx = x + dx * o, ny = y + dy * o;
+          if (nx < 0 || nx > 4 || ny < 0 || ny > 4) continue;
+          const t = s.cells[ny * 5 + nx];
+          if (t && t.o === p) continue;
+          out.push({ card, from: i, to: ny * 5 + nx });
+        }
+      }
+    }
+    return out;
+  }
+
+  function legal(s) {
+    if (s.winner) return [];
+    const m = boardMoves(s, s.cur);
+    return m.length ? m : s.hands[s.cur].map(card => ({ card, from: -1, to: -1 }));
+  }
+
+  function applyFast(s, mv) {
+    const p = s.cur, cells = s.cells.slice();
+    let piece = null, cap = null, winner = null, reason = null;
+    if (mv.from >= 0) {
+      piece = cells[mv.from]; cap = cells[mv.to];
+      cells[mv.to] = piece; cells[mv.from] = null;
+      if (cap && cap.k === "M") { winner = p; reason = "stone"; }
+      else if (piece.k === "M" && mv.to === ARCH[opp(p)]) { winner = p; reason = "stream"; }
+    }
+    const hands = { red: s.hands.red.slice(), blue: s.hands.blue.slice() };
+    hands[p][hands[p].indexOf(mv.card)] = s.side;
+    return {
+      state: { cells, hands, side: mv.card, cur: opp(p), first: s.first, turn: s.turn + 1, winner, reason },
+      rec: { turn: s.turn + 1, player: p, card: mv.card, from: mv.from, to: mv.to, piece, cap, received: s.side, winner, reason },
+    };
+  }
+
+  function apply(s, mv) {
+    const ok = legal(s).some(m => m.card === mv.card && m.from === mv.from && m.to === mv.to);
+    if (!ok) throw new Error("Jogada ilegal");
+    return applyFast(s, mv);
+  }
+
+  function attacked(s, by) { return new Set(boardMoves(s, by).map(m => m.to)); }
+  function masterPos(s, p) { return s.cells.findIndex(c => c && c.o === p && c.k === "M"); }
+
+  /* ---------- IA: negamax com poda alfa-beta ---------- */
+  const dist = (a, b) => Math.abs(a % 5 - b % 5) + Math.abs(((a / 5) | 0) - ((b / 5) | 0));
+
+  function evaluate(s) {
+    const p = s.cur, q = opp(p);
+    const mine = boardMoves(s, p);
+    for (const m of mine) {
+      const t = s.cells[m.to];
+      if ((t && t.k === "M") || (s.cells[m.from].k === "M" && m.to === ARCH[q])) return WIN - 1000;
+    }
+    const theirs = boardMoves(s, q);
+    let sc = 0, pm = -1, qm = -1;
+    for (let i = 0; i < 25; i++) {
+      const c = s.cells[i];
+      if (!c) continue;
+      const sign = c.o === p ? 1 : -1;
+      const x = i % 5, y = (i / 5) | 0;
+      let v = c.k === "S" ? 100 : 0;
+      if (x >= 1 && x <= 3 && y >= 1 && y <= 3) v += 7;
+      if (c.k === "M") { if (c.o === p) pm = i; else qm = i; }
+      sc += sign * v;
+    }
+    sc -= dist(pm, ARCH[q]) * 5;
+    sc += dist(qm, ARCH[p]) * 5;
+    sc += (mine.length - theirs.length) * 3;
+    let threatened = false;
+    for (const m of theirs) if (m.to === pm || (s.cells[m.from].k === "M" && m.to === ARCH[p])) { threatened = true; break; }
+    if (threatened) sc -= 70;
+    return sc;
+  }
+
+  function ordered(s, moves) {
+    const score = m => {
+      if (m.from < 0) return -1;
+      const t = s.cells[m.to];
+      if (t && t.k === "M") return 1000;
+      if (s.cells[m.from].k === "M" && m.to === ARCH[opp(s.cur)]) return 1000;
+      return t ? 100 : 0;
+    };
+    return moves.map(m => [score(m), m]).sort((a, b) => b[0] - a[0]).map(x => x[1]);
+  }
+
+  let deadline = Infinity, nodes = 0;
+  function negamax(s, depth, alpha, beta, ply) {
+    if (s.winner) return s.winner === s.cur ? WIN - ply : -(WIN - ply);
+    if (depth === 0) return evaluate(s);
+    if ((++nodes & 1023) === 0 && Date.now() > deadline) throw "timeout";
+    let best = -Infinity;
+    for (const m of ordered(s, legal(s))) {
+      const v = -negamax(applyFast(s, m).state, depth - 1, -beta, -alpha, ply + 1);
+      if (v > best) best = v;
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  function rootScores(s, depth, first) {
+    let moves = ordered(s, legal(s));
+    if (first) moves = [first, ...moves.filter(m => !(m.card === first.card && m.from === first.from && m.to === first.to))];
+    const out = [];
+    let alpha = -Infinity;
+    for (const m of moves) {
+      const v = -negamax(applyFast(s, m).state, depth - 1, -Infinity, -alpha + 1, 1);
+      out.push([v, m]);
+      if (v > alpha) alpha = v;
+    }
+    return out.sort((a, b) => b[0] - a[0]);
+  }
+
+  const LEVELS = {
+    easy:   { depth: 1, time: 300,  noise: 90 },
+    medium: { depth: 3, time: 900,  noise: 18 },
+    hard:   { depth: 5, time: 1500, noise: 0 },
+    expert: { depth: 9, time: 2800, noise: 0 },
+  };
+
+  function think(s, level) {
+    const cfg = LEVELS[level] || LEVELS.medium;
+    deadline = Date.now() + cfg.time; nodes = 0;
+    let scored = rootScores(s, 1, null);
+    for (let d = 2; d <= cfg.depth; d++) {
+      try { scored = rootScores(s, d, scored[0][1]); }
+      catch (e) { if (e === "timeout") break; throw e; }
+      if (Math.abs(scored[0][0]) > WIN / 2) break;
+    }
+    if (cfg.noise) {
+      const noisy = scored.map(([v, m]) => [Math.abs(v) > WIN / 2 ? v : v + (Math.random() * 2 - 1) * cfg.noise, m]);
+      noisy.sort((a, b) => b[0] - a[0]);
+      return noisy[0][1];
+    }
+    return scored[0][1];
+  }
+
+  return { CARDS, RED, BLUE, ARCH, opp, newGame, boardMoves, legal, apply, attacked, masterPos, think };
+}
+
+/* ===================== Interface ===================== */
+const E = ENGINE();
+const { CARDS, RED, BLUE } = E;
+const NAME = { red: "Vermelho", blue: "Azul" };
+const FILES = "abcde";
+const TORII = '<svg class="torii" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M6 16 Q50 6 94 16 L92 26 Q50 18 8 26 Z M14 34 H86 V42 H14 Z M24 26 H34 V96 H24 Z M66 26 H76 V96 H66 Z M46 24 H54 V36 H46 Z"/></svg>';
+
+const $ = id => document.getElementById(id);
+const table = $("table"), grid = $("grid"), cardsLayer = $("cards");
+
+let state, past = [], game = { mode: "ai", level: "medium", human: RED, rotate: false };
+let sel = { card: null, piece: -1, pendingTo: -1 };
+let thinking = false, worker = null, aiTimer = null, toastTimer = null;
+const pieceEls = new Map(), cardEls = new Map(), cellEls = [];
+
+const sqName = i => FILES[i % 5] + (((i / 5) | 0) + 1);
+const flipped = () => game.mode === "ai" ? game.human === BLUE : (game.rotate && state.cur === BLUE);
+const bottomPlayer = () => flipped() ? BLUE : RED;
+function screenOf(i) {
+  const x = i % 5, y = (i / 5) | 0;
+  return flipped() ? { col: 4 - x, row: y } : { col: x, row: 4 - y };
+}
+function indexAt(row, col) { return flipped() ? row * 5 + (4 - col) : (4 - row) * 5 + col; }
+const humanTurn = () => !state.winner && !thinking && (game.mode === "local" || state.cur === game.human);
+
+/* ---------- IA em Web Worker ---------- */
+function makeWorker() {
+  const src = `const E=(${ENGINE.toString()})(); onmessage=e=>{postMessage(E.think(e.data.state,e.data.level));};`;
+  try { return new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" }))); }
+  catch (e) { return null; }
+}
+
+function maybeAI() {
+  if (game.mode !== "ai" || state.winner || state.cur === game.human) return;
+  thinking = true;
+  renderPanel();
+  const snapshot = state;
+  aiTimer = setTimeout(() => {
+    const done = mv => {
+      if (state !== snapshot) return;
+      thinking = false;
+      doMove(mv);
+    };
+    if (!worker) worker = makeWorker();
+    if (worker) { worker.onmessage = e => done(e.data); worker.postMessage({ state, level: game.level }); }
+    else done(E.think(state, game.level));
+  }, 550);
+}
+
+function cancelAI() {
+  clearTimeout(aiTimer);
+  if (thinking && worker) { worker.terminate(); worker = null; }
+  thinking = false;
+}
+
+/* ---------- Construção ---------- */
+function buildGrid() {
+  grid.innerHTML = "";
+  cellEls.length = 0;
+  for (let row = 0; row < 5; row++) for (let col = 0; col < 5; col++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cell" + ((row + col) % 2 ? " alt" : "") + (col === 4 ? " col4" : "") + (row === 4 ? " row4" : "");
+    b.dataset.row = row; b.dataset.col = col;
+    grid.appendChild(b);
+    cellEls.push(b);
+  }
+  for (let k = 0; k < 5; k++) {
+    const f = document.createElement("span"); f.className = "coord file"; f.dataset.k = k;
+    f.style.left = (k * 20 + 10) + "%"; f.style.bottom = "-4.6%"; f.style.transform = "translateX(-50%)";
+    grid.appendChild(f);
+    const r = document.createElement("span"); r.className = "coord rank"; r.dataset.k = k;
+    r.style.top = (k * 20 + 10) + "%"; r.style.left = "-4%"; r.style.transform = "translate(-50%,-50%)";
+    grid.appendChild(r);
+  }
+  const layer = document.createElement("div"); layer.className = "pieces"; layer.id = "pieces";
+  grid.appendChild(layer);
+  pieceEls.clear();
+}
+
+function buildCards() {
+  cardsLayer.innerHTML = "";
+  cardEls.clear();
+  for (const id of [...state.hands.red, ...state.hands.blue, state.side]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "card";
+    b.innerHTML = `<img src="cards/${id}.svg" alt="Carta ${CARDS[id].pt}">`;
+    b.addEventListener("click", () => cardTap(id));
+    cardsLayer.appendChild(b);
+    cardEls.set(id, b);
+  }
+}
+
+/* ---------- Renderização ---------- */
+function render() { renderBoard(); layoutCards(); renderPanel(); }
+
+function destMap() {
+  const map = new Map();
+  if (sel.piece < 0 || !humanTurn()) return map;
+  for (const m of E.boardMoves(state, state.cur)) {
+    if (m.from !== sel.piece) continue;
+    if (sel.card && m.card !== sel.card) continue;
+    if (!map.has(m.to)) map.set(m.to, []);
+    map.get(m.to).push(m.card);
+  }
+  return map;
+}
+
+function renderBoard() {
+  const dests = destMap();
+  const last = past.length ? past[past.length - 1].rec : null;
+  cellEls.forEach(el => {
+    const i = indexAt(+el.dataset.row, +el.dataset.col);
+    el.dataset.i = i;
+    const archOwner = i === E.ARCH.red ? "red" : i === E.ARCH.blue ? "blue" : null;
+    el.classList.toggle("arch-red", archOwner === "red");
+    el.classList.toggle("arch-blue", archOwner === "blue");
+    if (archOwner && !el.querySelector(".torii")) el.insertAdjacentHTML("beforeend", TORII);
+    if (!archOwner) el.querySelector(".torii")?.remove();
+    el.classList.toggle("sel", i === sel.piece);
+    el.classList.toggle("dest", dests.has(i));
+    el.classList.toggle("capture", dests.has(i) && !!state.cells[i]);
+    el.classList.toggle("last", !!last && last.from >= 0 && (i === last.from || i === last.to));
+    const pc = state.cells[i];
+    el.setAttribute("aria-label", sqName(i) + (pc ? `, ${pc.k === "M" ? "Mestre" : "Aluno"} ${NAME[pc.o].toLowerCase()}` : "") + (dests.has(i) ? ", destino possível" : ""));
+  });
+  grid.querySelectorAll(".coord.file").forEach(f => { f.textContent = FILES[flipped() ? 4 - f.dataset.k : +f.dataset.k]; });
+  grid.querySelectorAll(".coord.rank").forEach(r => { r.textContent = flipped() ? +r.dataset.k + 1 : 5 - r.dataset.k; });
+
+  const layer = $("pieces");
+  const present = new Set();
+  const threatened = new Set();
+  for (const p of [RED, BLUE]) {
+    const m = E.masterPos(state, p);
+    if (m >= 0 && !state.winner && E.attacked(state, E.opp(p)).has(m)) threatened.add(m);
+  }
+  state.cells.forEach((pc, i) => {
+    if (!pc) return;
+    present.add(pc.id);
+    let el = pieceEls.get(pc.id);
+    if (!el) {
+      el = document.createElement("div");
+      el.className = `piece ${pc.o} ${pc.k === "M" ? "master" : "student"}`;
+      el.innerHTML = `<div class="token">${pc.k === "M" ? "師" : "弟"}</div>`;
+      layer.appendChild(el);
+      pieceEls.set(pc.id, el);
+    }
+    el.classList.remove("gone");
+    const { col, row } = screenOf(i);
+    el.style.left = col * 20 + "%";
+    el.style.top = row * 20 + "%";
+    el.classList.toggle("threat", threatened.has(i));
+  });
+  for (const [id, el] of pieceEls) {
+    if (!present.has(id) && !el.classList.contains("gone")) {
+      el.classList.add("gone");
+      setTimeout(() => { if (el.classList.contains("gone")) { el.remove(); pieceEls.delete(id); } }, 450);
+    }
+  }
+}
+
+function slotRect(id) {
+  const t = table.getBoundingClientRect(), r = $(id).getBoundingClientRect();
+  return { left: r.left - t.left, top: r.top - t.top, width: r.width, height: r.height };
+}
+
+function layoutCards() {
+  const bottom = bottomPlayer(), top = E.opp(bottom);
+  const place = new Map();
+  state.hands[bottom].forEach((c, i) => place.set(c, { slot: "slot-bottom-" + i, rot: 0, owner: bottom }));
+  state.hands[top].forEach((c, i) => place.set(c, { slot: "slot-top-" + i, rot: 180, owner: top }));
+  // A carta de troca fica à direita de quem vai recebê-la (o jogador da vez), virada para ele.
+  place.set(state.side, state.cur === bottom
+    ? { slot: "slot-side-right", rot: 0, owner: null }
+    : { slot: "slot-side-left", rot: 180, owner: null });
+  const canAct = humanTurn();
+  const passing = canAct && E.legal(state)[0]?.from === -1;
+  const dests = destMap();
+  const askCards = sel.pendingTo >= 0 ? (dests.get(sel.pendingTo) || []) : [];
+  for (const [id, p] of place) {
+    const el = cardEls.get(id), r = slotRect(p.slot);
+    Object.assign(el.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" });
+    const mine = p.owner === state.cur && canAct;
+    const lift = id === sel.card ? (p.rot ? 10 : -10) : 0;
+    el.style.transform = `translateY(${lift}px) rotate(${p.rot}deg)`;
+    el.classList.toggle("selected", id === sel.card);
+    el.classList.toggle("ask", askCards.includes(id) || (passing && mine));
+    el.classList.toggle("idle", p.owner !== null && !mine);
+    el.classList.toggle("side-card", p.owner === null);
+    el.setAttribute("aria-label", `Carta ${CARDS[id].pt}` + (p.owner ? ` — mão ${NAME[p.owner].toLowerCase()}` : " — carta de troca"));
+    el.setAttribute("aria-pressed", id === sel.card ? "true" : "false");
+  }
+}
+
+function countPieces(p) {
+  const list = state.cells.filter(c => c && c.o === p);
+  const students = list.filter(c => c.k === "S").length;
+  const hasMaster = list.some(c => c.k === "M");
+  return `${hasMaster ? "Mestre" : "sem Mestre"} + ${students} ${students === 1 ? "aluno" : "alunos"}`;
+}
+
+function renderPanel() {
+  const who = state.cur;
+  $("modeLabel").textContent = game.mode === "ai"
+    ? `Contra a IA · ${{ easy: "Fácil", medium: "Médio", hard: "Difícil", expert: "Especialista" }[game.level]} · você joga de ${NAME[game.human]}`
+    : "2 jogadores neste aparelho";
+  const title = $("turnTitle"), hint = $("turnHint");
+  if (state.winner) {
+    title.innerHTML = `<span class="dot ${state.winner}"></span> ${NAME[state.winner]} venceu`;
+    hint.textContent = state.reason === "stone" ? "Caminho da Pedra: o Mestre adversário foi capturado." : "Caminho do Fluxo: o Mestre chegou ao Arco do Templo adversário.";
+  } else {
+    const isYou = game.mode === "ai" ? who === game.human : true;
+    title.innerHTML = `<span class="dot ${who}"></span> Vez do ${NAME[who]}${game.mode === "ai" ? (isYou ? " (você)" : " (IA)") : ""}`;
+    const m = E.masterPos(state, who);
+    const danger = E.attacked(state, E.opp(who)).has(m);
+    let text;
+    if (thinking) text = "A IA está pensando…";
+    else if (E.legal(state)[0]?.from === -1) text = "Nenhuma carta permite mover. Toque numa das suas cartas para trocá-la sem mover.";
+    else if (sel.pendingTo >= 0) text = "As duas cartas levam a essa casa. Toque na carta que quer usar.";
+    else if (sel.piece >= 0) text = "Toque numa casa marcada para mover. Toque numa carta para ver só os movimentos dela.";
+    else if (sel.card) text = `${CARDS[sel.card].pt} selecionada. Agora toque numa peça sua.`;
+    else text = "Toque numa carta e depois numa peça, ou toque direto numa peça. Também dá para arrastar.";
+    hint.innerHTML = text + (danger && !thinking ? ' <span class="warn">Seu Mestre está ameaçado.</span>' : "");
+  }
+  $("counts").innerHTML = [RED, BLUE].map(p => `<div><span class="dot ${p}"></span>${countPieces(p)}</div>`).join("");
+  $("btnUndo").disabled = past.length === 0 || (game.mode === "ai" && !past.some(h => h.rec.player === game.human));
+
+  const ol = $("history");
+  if (!past.length) ol.innerHTML = `<li class="empty" style="display:block">Nenhuma jogada ainda. ${NAME[state.first]} começa (selo da carta de troca ${CARDS[state.side].pt}).</li>`;
+  else ol.innerHTML = past.map(({ rec }) => {
+    const move = rec.from < 0 ? "trocou sem mover" : `${rec.piece.k === "M" ? "師" : "弟"} ${sqName(rec.from)}→${sqName(rec.to)}`;
+    const cap = rec.cap ? `<span class="cap">captura${rec.cap.k === "M" ? " do Mestre" : ""}</span>` : "";
+    return `<li><span class="n">${rec.turn}.</span><span class="dot ${rec.player}"></span><span>${CARDS[rec.card].pt} · ${move}</span>${cap}</li>`;
+  }).join("");
+  ol.scrollTop = ol.scrollHeight;
+}
+
+/* ---------- Ações ---------- */
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+function clearSel() { sel = { card: null, piece: -1, pendingTo: -1 }; }
+
+function doMove(mv) {
+  const { state: ns, rec } = E.apply(state, mv);
+  past.push({ prev: state, rec });
+  state = ns;
+  clearSel();
+  render();
+  if (state.winner) setTimeout(showWin, 750);
+  else maybeAI();
+}
+
+function cardTap(id) {
+  if (state.winner) return;
+  if (!humanTurn()) { toast(thinking ? "Aguarde a IA jogar." : "Não é a sua vez."); return; }
+  if (!state.hands[state.cur].includes(id)) {
+    toast(id === state.side ? "Essa é a carta de troca: ela entra na sua mão depois que você jogar." : "Essa carta é do adversário.");
+    return;
+  }
+  if (E.legal(state)[0]?.from === -1) { doMove({ card: id, from: -1, to: -1 }); return; }
+  if (sel.pendingTo >= 0) {
+    if ((destMap().get(sel.pendingTo) || []).includes(id)) { doMove({ card: id, from: sel.piece, to: sel.pendingTo }); return; }
+  }
+  sel.card = sel.card === id ? null : id;
+  sel.pendingTo = -1;
+  render();
+}
+
+function tryMoveTo(to) {
+  const cards = destMap().get(to);
+  if (!cards) return false;
+  if (cards.length === 1) { doMove({ card: cards[0], from: sel.piece, to }); return true; }
+  sel.pendingTo = to;
+  render();
+  toast("As duas cartas chegam a essa casa. Toque na carta que quer usar.");
+  return true;
+}
+
+function cellTap(i) {
+  if (!humanTurn()) { if (!state.winner) toast(thinking ? "Aguarde a IA jogar." : "Não é a sua vez."); return; }
+  if (sel.piece >= 0 && tryMoveTo(i)) return;
+  const pc = state.cells[i];
+  if (pc && pc.o === state.cur) { sel.piece = sel.piece === i ? -1 : i; sel.pendingTo = -1; render(); return; }
+  if (sel.piece >= 0 || sel.pendingTo >= 0) { sel.piece = -1; sel.pendingTo = -1; render(); }
+}
+
+/* ---------- Toque e arrasto ---------- */
+let press = null;
+grid.addEventListener("pointerdown", e => {
+  const cell = e.target.closest(".cell");
+  if (!cell) return;
+  const i = +cell.dataset.i, pc = state.cells[i];
+  if (humanTurn() && pc && pc.o === state.cur) {
+    const wasSel = sel.piece === i;
+    sel.piece = i; sel.pendingTo = -1; render();
+    press = { i, x: e.clientX, y: e.clientY, wasSel, el: pieceEls.get(pc.id), drag: false };
+    grid.setPointerCapture(e.pointerId);
+  } else {
+    press = { i, tap: true };
+  }
+});
+grid.addEventListener("pointermove", e => {
+  if (!press || press.tap) return;
+  const dx = e.clientX - press.x, dy = e.clientY - press.y;
+  if (!press.drag && Math.hypot(dx, dy) > 6) { press.drag = true; press.el.classList.add("dragging"); }
+  if (press.drag) press.el.style.transform = `translate(${dx}px, ${dy}px)`;
+});
+grid.addEventListener("pointerup", e => {
+  if (!press) return;
+  const p = press; press = null;
+  if (p.tap) { cellTap(p.i); return; }
+  if (p.drag) {
+    p.el.classList.remove("dragging");
+    const target = document.elementFromPoint(e.clientX, e.clientY)?.closest(".cell");
+    const to = target ? +target.dataset.i : -1;
+    if (to >= 0 && destMap().has(to)) {
+      // Coloca a peça já no destino sem animar o caminho de volta.
+      p.el.style.transition = "none"; p.el.style.transform = "";
+      const { col, row } = screenOf(to);
+      p.el.style.left = col * 20 + "%"; p.el.style.top = row * 20 + "%";
+      requestAnimationFrame(() => { p.el.style.transition = ""; });
+      tryMoveTo(to);
+    } else {
+      p.el.style.transform = "";
+    }
+    return;
+  }
+  if (p.wasSel) { sel.piece = -1; render(); }
+});
+grid.addEventListener("pointercancel", () => { if (press?.el) { press.el.classList.remove("dragging"); press.el.style.transform = ""; } press = null; });
+grid.addEventListener("click", e => {          // teclado (Enter/Espaço nas casas)
+  if (e.detail !== 0) return;
+  const cell = e.target.closest(".cell");
+  if (cell) cellTap(+cell.dataset.i);
+});
+
+/* ---------- Partida ---------- */
+function startGame(opts) {
+  cancelAI();
+  Object.assign(game, opts);
+  state = E.newGame();
+  past = [];
+  clearSel();
+  buildGrid();
+  buildCards();
+  // Primeiro posicionamento sem animação.
+  document.body.classList.add("no-anim");
+  render();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if ($("animToggle").checked) document.body.classList.remove("no-anim");
+  }));
+  toast(`${NAME[state.first]} começa: selo da carta ${CARDS[state.side].pt}.`);
+  maybeAI();
+}
+
+function undo() {
+  if (!past.length) return;
+  cancelAI();
+  $("winDialog").hidden = true;
+  let h = past.pop();
+  if (game.mode === "ai") {
+    while (h.rec.player !== game.human && past.length) h = past.pop();
+  }
+  state = h.prev;
+  clearSel();
+  render();
+  maybeAI();
+}
+
+function showWin() {
+  const w = state.winner;
+  $("winKanji").className = "kanji " + w;
+  const you = game.mode === "ai";
+  $("winTitle").textContent = you ? (w === game.human ? "Você venceu!" : "A IA venceu") : `${NAME[w]} venceu`;
+  $("winText").textContent = state.reason === "stone"
+    ? "Caminho da Pedra: o Mestre adversário foi capturado."
+    : "Caminho do Fluxo: o Mestre chegou ao Arco do Templo adversário.";
+  $("winDialog").hidden = false;
+  $("winNew").focus();
+}
+
+/* ---------- Diálogos ---------- */
+function openNew() {
+  const f = $("newForm");
+  f.mode.value = game.mode; f.level.value = game.level; f.color.value = game.human; f.rotate.value = game.rotate ? "yes" : "no";
+  syncNewForm();
+  $("newDialog").hidden = false;
+}
+function syncNewForm() {
+  const ai = $("newForm").mode.value === "ai";
+  $("levelSet").hidden = !ai; $("colorSet").hidden = !ai; $("rotateSet").hidden = ai;
+}
+$("newForm").addEventListener("change", syncNewForm);
+$("newForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  $("newDialog").hidden = true;
+  startGame({ mode: f.mode.value, level: f.level.value, human: f.color.value, rotate: f.rotate.value === "yes" });
+});
+$("newCancel").onclick = () => { $("newDialog").hidden = true; };
+$("btnNew").onclick = openNew;
+$("winNew").onclick = () => { $("winDialog").hidden = true; openNew(); };
+$("winClose").onclick = () => { $("winDialog").hidden = true; };
+$("btnUndo").onclick = undo;
+$("btnRules").onclick = () => { $("rulesDialog").hidden = false; };
+$("rulesClose").onclick = () => { $("rulesDialog").hidden = true; };
+$("btnLibrary").onclick = () => { $("libDialog").hidden = false; };
+$("libClose").onclick = () => { $("libDialog").hidden = true; };
+document.querySelectorAll(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o) o.hidden = true; }));
+document.addEventListener("keydown", e => { if (e.key === "Escape") document.querySelectorAll(".overlay").forEach(o => o.hidden = true); });
+$("animToggle").addEventListener("change", e => document.body.classList.toggle("no-anim", !e.target.checked));
+
+function describe(dx, dy) {
+  const parts = [];
+  if (dy) parts.push(`${Math.abs(dy)} para ${dy > 0 ? "frente" : "trás"}`);
+  if (dx) parts.push(`${Math.abs(dx)} para a ${dx > 0 ? "direita" : "esquerda"}`);
+  return parts.join(" e ");
+}
+$("libGrid").innerHTML = Object.entries(CARDS).map(([id, c]) =>
+  `<figure><img src="cards/${id}.svg" alt="Carta ${c.pt}" loading="lazy"><figcaption><b>${c.pt}</b> (${c.en}) · começa: ${NAME[c.stamp]}<br>${c.moves.map(([x, y]) => describe(x, y)).join("; ")}</figcaption></figure>`
+).join("");
+
+let resizeRaf = 0;
+window.addEventListener("resize", () => {
+  cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => {
+    document.body.classList.add("no-anim");
+    layoutCards();
+    requestAnimationFrame(() => { if ($("animToggle").checked) document.body.classList.remove("no-anim"); });
+  });
+});
+document.fonts?.ready.then(() => layoutCards());
+
+startGame({ mode: "ai", level: "medium", human: RED, rotate: false });
+</script>
+</body>
+</html>

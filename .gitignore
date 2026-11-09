@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Ambiente
+.env
+*.env.local
+
+# Fontes baixadas para gerar a arte (licença OFL; não versionar binários grandes)
+tools/fonts/
+*.ttf
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Sistema / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
